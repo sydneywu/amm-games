@@ -1,0 +1,34 @@
+<html>
+<iframe id="inlineFrameExample"
+    title="Inline Frame Example"
+    width="1000"
+    height="600"
+    frameBorder="0"
+    src="http://localhost:8081">
+</iframe>
+
+
+<script>
+	window.addEventListener('message', (msg)=>{
+		console.log('received message', msg.data)
+	})
+
+	var srcQuote = 'hello'
+
+	let dataSrc = {
+		name: srcQuote,
+	}
+
+	let dataString = JSON.stringify(dataSrc)
+
+    var iframeSource = 'http://localhost:8081?data='+dataString;
+    var iframe = document.createElement('iframe');
+    iframe.setAttribute('src', iframeSource);
+    iframe.setAttribute('id', 'the_iframe');
+    iframe.setAttribute('width', 1000);
+    iframe.setAttribute('height', 600);
+    iframe.setAttribute('frameBorder', 0);
+
+    document.body.appendChild(iframe);
+</script>
+</html>
