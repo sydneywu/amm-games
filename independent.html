@@ -1,17 +1,39 @@
 <html>
-<iframe id="inlineFrameExample"
-    title="Inline Frame Example"
-    width="1000"
-    height="600"
-    frameBorder="0"
-    src="http://localhost:8081">
-</iframe>
+<body>
 
-
+</body>
 <script>
 	window.addEventListener('message', (msg)=>{
 		console.log('received message', msg.data)
 	})
+
+	var prizeConfig = [
+    {
+      "id": 4,
+      "prizeType": 1,
+      "code": "EVoucher",
+      "winRate": 0.5,
+      "maxRewardable": 10,
+      "requireStockAvailable": false
+    },
+    {
+      "id": 5,
+      "prizeType": 2,
+      "code": "T-Shirt",
+      "winRate": 0.25,
+      "maxRewardable": 10,
+      "requireStockAvailable": false
+    },
+    {
+      "id": 6,
+      "prizeType": 3,
+      "code": "Mug",
+      "winRate": 0.25,
+      "maxRewardable": 10,
+      "requireStockAvailable": false
+    }
+]
+
 
 	var srcQuote = 'hello'
 
@@ -21,7 +43,7 @@
 
 	let dataString = JSON.stringify(dataSrc)
 
-    var iframeSource = 'http://localhost:8081?data='+dataString;
+    var iframeSource = 'http://localhost:8081/wheel/circle2?data='+dataString;
     var iframe = document.createElement('iframe');
     iframe.setAttribute('src', iframeSource);
     iframe.setAttribute('id', 'the_iframe');

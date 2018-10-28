@@ -1,0 +1,259 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Making your first Phaser 3 Game - Part 2</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var prizeConfig = [
+        {
+          "id": 4,
+          "prizeType": 1,
+          "code": "EVoucher",
+          "winRate": 0.5,
+          "maxRewardable": 10,
+          "requireStockAvailable": false
+        },
+        {
+          "id": 5,
+          "prizeType": 2,
+          "code": "T-Shirt",
+          "winRate": 0.25,
+          "maxRewardable": 10,
+          "requireStockAvailable": false
+        },
+        {
+          "id": 6,
+          "prizeType": 3,
+          "code": "Mug",
+          "winRate": 0.25,
+          "maxRewardable": 10,
+          "requireStockAvailable": false
+        }
+    ]
+
+      // slices configuration
+    var slices= [
+        {
+            degrees: 120,
+            startColor: 0xff0000,
+            endColor: 0xff8800,
+            rings: 1,
+            iconFrame: 1,
+            iconScale: 0.4,
+            text: "BANANA"
+        },
+        {
+            degrees: 120,
+            startColor: 0x00ff00,
+            endColor: 0x004400,
+            rings: 1,
+            iconFrame: 0,
+            iconScale: 0.4,
+            text: "PEAR"
+        },
+        {
+            degrees: 120,
+            startColor: 0x0000ff,
+            endColor: 0x0000ff,
+            rings: 1,
+            iconFrame: 2,
+            iconScale: 0.4,
+            text: "ORANGE"
+        },
+        /*{
+            degrees: 90,
+            startColor: 0x666666,
+            endColor: 0x999999,
+            rings: 1,
+            iconFrame: 3,
+            iconScale: 0.4,
+            text: "STRAWBERRY"
+        },*/
+        /*{
+            degrees: 90,
+            startColor: 0xff0000,
+            endColor: 0xffff00,
+            rings: 1,
+            iconFrame: 4,
+            iconScale: 0.4,
+            text: "CHERRY"
+        }*/
+    ]
+
+    var gameOptions = {
+
+        // wheel rotation duration range, in milliseconds
+        rotationTimeRange: {
+            min: 3000,
+            max: 4500
+        },
+
+        // wheel rounds before it stops
+        wheelRounds: {
+            min: 2,
+            max: 11
+        },
+
+        // degrees the wheel will rotate in the opposite direction before it stops
+        backSpin: {
+            min: 1,
+            max: 4
+        },
+
+        // wheel radius, in pixels
+        wheelRadius: 240,
+
+        // color of stroke lines
+        strokeColor: 0xffffff,
+
+        // width of stroke lines
+        strokeWidth: 2,
+
+        slices: slices
+    }
+
+  
+
+    var config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        backgroundColor: 0xffffff,
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    var game = new Phaser.Game(config);
+
+    function preload (){}
+
+    function create (){
+        var startDegrees = 0;
+
+        /*
+        var graphics2 = this.add.graphics({ fillStyle: { color: 0xff0000 } });
+        var circleBig = new Phaser.Geom.Circle(400, 300, 200);
+        var circleSmall = new Phaser.Geom.Circle(200, 200, 100);
+        graphics2.fillCircleShape(circleBig);
+        graphics2.fillStyle(0xdddddd)
+        graphics2.fillCircleShape(circleSmall);
+        */
+
+        var graphics = this.make.graphics({x: 0, y: 0,add: false});
+        this.wheelContainer = this.add.container(game.config.width / 2, game.config.height / 2);
+        var iconArray = [];
+
+        // looping through each slice
+        for(var i = 0; i < gameOptions.slices.length; i++){
+
+            // converting colors from 0xRRGGBB format to Color objects
+            var startColor = Phaser.Display.Color.ValueToColor(gameOptions.slices[i].startColor);
+            var endColor = Phaser.Display.Color.ValueToColor(gameOptions.slices[i].endColor)
+       
+            var ringColor = Phaser.Display.Color.Interpolate.ColorWithColor(startColor,endColor, gameOptions.slices[i].rings, 1);
+            var ringColorString = Phaser.Display.Color.RGBToString(Math.round(ringColor.r), Math.round(ringColor.g), Math.round(ringColor.b), 0, "0x");
+            graphics.fillStyle(ringColorString, 1);
+            graphics.slice(gameOptions.wheelRadius + gameOptions.strokeWidth, gameOptions.wheelRadius + gameOptions.strokeWidth, gameOptions.wheelRadius, Phaser.Math.DegToRad(startDegrees), Phaser.Math.DegToRad(startDegrees + gameOptions.slices[i].degrees), false);
+            graphics.fillPath();
+
+            // setting line style
+            graphics.lineStyle(gameOptions.strokeWidth, gameOptions.strokeColor, 1);
+
+            // drawing the biggest slice
+            graphics.slice(gameOptions.wheelRadius + gameOptions.strokeWidth, gameOptions.wheelRadius + gameOptions.strokeWidth, gameOptions.wheelRadius, Phaser.Math.DegToRad(startDegrees), Phaser.Math.DegToRad(startDegrees + gameOptions.slices[i].degrees), false);
+
+            // stroking the slice
+            graphics.strokePath();
+
+            // adding the icon
+            //var icon = this.add.image(gameOptions.wheelRadius * 0.75 * Math.cos(Phaser.Math.DegToRad(startDegrees + gameOptions.slices[i].degrees / 2)), gameOptions.wheelRadius * 0.75 * Math.sin(Phaser.Math.DegToRad(startDegrees + gameOptions.slices[i].degrees / 2)), "icons", gameOptions.slices[i].iconFrame);
+
+            // scaling the icon according to game preferences
+            //icon.scaleX = gameOptions.slices[i].iconScale;
+            //icon.scaleY = gameOptions.slices[i].iconScale;
+
+            // rotating the icon
+            //icon.angle = startDegrees + gameOptions.slices[i].degrees / 2 + 90;
+
+            // adding the icon to icon array
+            //iconArray.push(icon);
+
+            // updating degrees
+            startDegrees += gameOptions.slices[i].degrees;
+
+        }
+
+
+        /*
+        for(var i=0; i<slices.length; i++){
+            console.log(startDegrees, "--", slices[i].degrees)
+
+            var color = Phaser.Display.Color.ValueToColor(slices[i].startColor);
+            var colorString =  Phaser.Display.Color.RGBToString(Math.round(color.r), Math.round(color.g), Math.round(color.b), 0, "0x");
+            graphics.fillStyle(colorString, 1);
+
+            graphics.slice(
+                gameOptions.wheelRadius + gameOptions.strokeWidth, 
+                gameOptions.wheelRadius + gameOptions.strokeWidth, 
+                gameOptions.wheelRadius, 
+                Phaser.Math.DegToRad(startDegrees), 
+                Phaser.Math.DegToRad(startDegrees + slices[i].degrees), 
+                false
+            );
+
+            graphics.fillPath();
+            
+
+            graphics.lineStyle(
+                gameOptions.strokeWidth, 
+                gameOptions.strokeColor, 
+                1
+            );
+            
+            graphics.slice(
+                gameOptions.wheelRadius + gameOptions.strokeWidth, 
+                gameOptions.wheelRadius + gameOptions.strokeWidth, 
+                gameOptions.wheelRadius, 
+                Phaser.Math.DegToRad(startDegrees), 
+                Phaser.Math.DegToRad(startDegrees + slices[i].degrees), 
+                false
+            );
+        
+            graphics.strokePath();
+          
+
+            startDegrees += slices[i].degrees;
+        }
+        */
+
+        graphics.generateTexture("wheel", (gameOptions.wheelRadius + gameOptions.strokeWidth) * 2, (gameOptions.wheelRadius + gameOptions.strokeWidth) * 2);
+
+
+        var wheel = this.add.sprite(0, 0, "wheel");
+
+        this.wheelContainer.add(wheel);
+
+    }
+
+    function update ()
+    {
+        
+    }
+
+</script>
+
+</body>
+</html>
