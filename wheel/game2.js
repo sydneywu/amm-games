@@ -113,9 +113,6 @@ class playGame extends Phaser.Scene{
 
     // method to be executed once the scene has been created
     create(){
-        setTimeout(function(){
-            parent.postMessage("message", "*")
-        },1000)
 
         // starting degrees
         var startDegrees = -90;
@@ -201,8 +198,6 @@ class playGame extends Phaser.Scene{
             startDegrees += gameOptions.slices[i].degrees;
 
         }
-
-        console.log(this.descriptionContainers);
 
         // generate a texture called "wheel" from graphics data
         graphics.generateTexture("wheel", (gameOptions.wheelRadius + gameOptions.strokeWidth) * 2, (gameOptions.wheelRadius + gameOptions.strokeWidth) * 2);
@@ -312,9 +307,15 @@ class playGame extends Phaser.Scene{
                         ease: "Cubic.easeIn",
                         callbackScope: this,
                         onComplete: function(tween){
-                            console.log('spin ended')
-                            swal(gameOptions.winMessage)
-
+                            swal({ 
+                                title: gameOptions.winMessage,
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'Proceed!'
+                            }).then(function(result) {
+                                if (result.value) {
+                                    parent.postMessage("message", "*")
+                                }
+                            })
                         }
                     })
                 }

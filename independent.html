@@ -1,81 +1,27 @@
 <html>
+<head>
+        <script src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src = "https://cdn.jsdelivr.net/npm/sweetalert2@7.28.10/dist/sweetalert2.all.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+
+</head>
 <body>
+  <div id="select-container" class="form-group mx-5 mt-5">
+    <label for="sel1">Games</label>
+    <select class="form-control" id="game-select">
+      <option> </option>
+      <option value="wheel">Wheel - 3 chances</option>
+    </select>
+  </div>
 
-<script>
-	window.addEventListener('message', (msg)=>{
-		console.log('received message', msg.data)
-	})
+  <div id="info-container" class="form-group mx-5 mt-5">
+    <p> Wheel Game </p>
+    <p> Chances : 3 </p>
+    <button type="button" class="btn btn-default" id="play-btn"> PLAY </button>
+  </div>
 
-	var prizeConfig = [
-    {
-      "id": 1,
-      "prizeType": 1,
-      "code": "T-shirt",
-      "winRate": 0.25,
-      "maxRewardable": 10,
-      "requireStockAvailable": false
-    },
-    {
-      "id": 2,
-      "prizeType": 1,
-      "code": "Evoucher",
-      "winRate": 0.25,
-      "maxRewardable": 10,
-      "requireStockAvailable": false
-    },
-    {
-      "id": 3,
-      "prizeType": 2,
-      "code": "Food",
-      "winRate": 0.25,
-      "maxRewardable": 10,
-      "requireStockAvailable": false
-    },
-    {
-      "id": 4,
-      "prizeType": 3,
-      "code": "Books",
-      "winRate": 0.25,
-      "maxRewardable": 10,
-      "requireStockAvailable": false
-    }
-  ]
+  <div id="iframe-container"></div>
 
-  var slices = []
-
-  var totalProbability = prizeConfig.reduce((acc , curr)=>{
-    return acc + curr.winRate 
-  }, 0)
-
-  prizeConfig.forEach((prize,i)=>{
-    var prize = {
-        id: prize.id,
-        degrees: prize.winRate/totalProbability * 360,
-        text: prize.code
-    }
-    slices.push(prize);
-  })
-
-
-  let dataSrc = {
-    slices: slices,
-    wheelRounds: 4,
-    winId: 2,
-    winMessage: "Congratulations! You won Evoucher"
-  }
-
-  let dataString = JSON.stringify(dataSrc)
-
-  var iframeSource = 'http://localhost:8080/wheel/circle2?data='+dataString;
-  var iframe = document.createElement('iframe');
-  iframe.setAttribute('src', iframeSource);
-  iframe.setAttribute('id', 'the_iframe');
-  iframe.setAttribute('width', 1000);
-  iframe.setAttribute('height', 600);
-  iframe.setAttribute('frameBorder', 0);
-
-  document.body.appendChild(iframe);
-</script>
-
+  <script src = "independent.js"></script>
 </body>
 </html>
