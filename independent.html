@@ -1,7 +1,6 @@
 <html>
 <body>
 
-</body>
 <script>
 	window.addEventListener('message', (msg)=>{
 		console.log('received message', msg.data)
@@ -9,48 +8,74 @@
 
 	var prizeConfig = [
     {
-      "id": 4,
+      "id": 1,
       "prizeType": 1,
-      "code": "EVoucher",
-      "winRate": 0.5,
-      "maxRewardable": 10,
-      "requireStockAvailable": false
-    },
-    {
-      "id": 5,
-      "prizeType": 2,
-      "code": "T-Shirt",
+      "code": "T-shirt",
       "winRate": 0.25,
       "maxRewardable": 10,
       "requireStockAvailable": false
     },
     {
-      "id": 6,
+      "id": 2,
+      "prizeType": 1,
+      "code": "Evoucher",
+      "winRate": 0.25,
+      "maxRewardable": 10,
+      "requireStockAvailable": false
+    },
+    {
+      "id": 3,
+      "prizeType": 2,
+      "code": "Food",
+      "winRate": 0.25,
+      "maxRewardable": 10,
+      "requireStockAvailable": false
+    },
+    {
+      "id": 4,
       "prizeType": 3,
-      "code": "Mug",
+      "code": "Books",
       "winRate": 0.25,
       "maxRewardable": 10,
       "requireStockAvailable": false
     }
-]
+  ]
+
+  var slices = []
+
+  var totalProbability = prizeConfig.reduce((acc , curr)=>{
+    return acc + curr.winRate 
+  }, 0)
+
+  prizeConfig.forEach((prize,i)=>{
+    var prize = {
+        id: prize.id,
+        degrees: prize.winRate/totalProbability * 360,
+        text: prize.code
+    }
+    slices.push(prize);
+  })
 
 
-	var srcQuote = 'hello'
+  let dataSrc = {
+    slices: slices,
+    wheelRounds: 4,
+    winId: 2,
+    winMessage: "Congratulations! You won Evoucher"
+  }
 
-	let dataSrc = {
-		name: srcQuote,
-	}
+  let dataString = JSON.stringify(dataSrc)
 
-	let dataString = JSON.stringify(dataSrc)
+  var iframeSource = 'http://localhost:8080/wheel/circle2?data='+dataString;
+  var iframe = document.createElement('iframe');
+  iframe.setAttribute('src', iframeSource);
+  iframe.setAttribute('id', 'the_iframe');
+  iframe.setAttribute('width', 1000);
+  iframe.setAttribute('height', 600);
+  iframe.setAttribute('frameBorder', 0);
 
-    var iframeSource = 'http://localhost:8081/wheel/circle2?data='+dataString;
-    var iframe = document.createElement('iframe');
-    iframe.setAttribute('src', iframeSource);
-    iframe.setAttribute('id', 'the_iframe');
-    iframe.setAttribute('width', 1000);
-    iframe.setAttribute('height', 600);
-    iframe.setAttribute('frameBorder', 0);
-
-    document.body.appendChild(iframe);
+  document.body.appendChild(iframe);
 </script>
+
+</body>
 </html>

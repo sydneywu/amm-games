@@ -1,3 +1,8 @@
+var urlParams = new URLSearchParams(window.location.search);
+var dataSrcStr = urlParams.get('data');
+var dataSrc = JSON.parse(dataSrcStr)
+checkDataSrc(dataSrc);
+
 // the game itself
 var game;
 
@@ -5,61 +10,19 @@ var defaultColors = [
     0x88bb00,
     0x0088bb,
     0x8800bb,
-    0x8800bb,
     0xbb0088,
     0xbbbb88,
     0x88bbbb,
     0xbb88bb,
     0x8888bb,
     0xbb8888
-
-]
-var prizeConfig = [
-    {
-      "id": 4,
-      "prizeType": 1,
-      "code": "EVoucher",
-      "winRate": 0.5,
-      "maxRewardable": 10,
-      "requireStockAvailable": false
-    },
-    {
-      "id": 5,
-      "prizeType": 2,
-      "code": "T-Shirt",
-      "winRate": 0.25,
-      "maxRewardable": 10,
-      "requireStockAvailable": false
-    },
-    {
-      "id": 6,
-      "prizeType": 3,
-      "code": "Mug",
-      "winRate": 0.25,
-      "maxRewardable": 10,
-      "requireStockAvailable": false
-    }
 ]
 
-var slices = []
-var totalProbability = prizeConfig.reduce((acc , curr)=>{
-    return acc + curr.winRate 
-}, 0)
-
-console.log(totalProbability)
-prizeConfig.forEach((prize,i)=>{
-    var slice = {
-        degrees: prize.winRate/totalProbability * 360,
-        startColor: defaultColors[i],
-        text: prize.code
-    }
-    slices.push(slice);
-})
+var winIndex = dataSrc.slices.findIndex(slice => slice.id === dataSrc.winId)
 
 var gameOptions = {
-
     // slices configuration
-    slices: slices,
+    slices: dataSrc.slices,
     // wheel rotation duration range, in milliseconds
     rotationTimeRange: {
         min: 3000,
@@ -68,14 +31,19 @@ var gameOptions = {
 
     // wheel rounds before it stops
     wheelRounds: {
-        min: 2,
-        max: 11
+        min: dataSrc.wheelRounds,
+        max: dataSrc.wheelRounds
+    },
+
+    spinDegree: {
+        min: 360 - findWinAngleMin(dataSrc.slices, winIndex),
+        max: 360 - findWinAngleMax(dataSrc.slices, winIndex)
     },
 
     // degrees the wheel will rotate in the opposite direction before it stops
     backSpin: {
-        min: 1,
-        max: 4
+        min: 0,
+        max: 0
     },
 
     // wheel radius, in pixels
@@ -85,7 +53,9 @@ var gameOptions = {
     strokeColor: 0xffffff,
 
     // width of stroke lines
-    strokeWidth: 2
+    strokeWidth: 2,
+
+    winMessage: dataSrc.winMessage
 }
 
 // once the window loads...
@@ -169,7 +139,7 @@ class playGame extends Phaser.Scene{
         for(var i = 0; i < gameOptions.slices.length; i++){
 
             // converting colors from 0xRRGGBB format to Color objects
-            var ringColor = Phaser.Display.Color.ValueToColor(gameOptions.slices[i].startColor);
+            var ringColor = Phaser.Display.Color.ValueToColor(defaultColors[i]);
             var ringColorString = Phaser.Display.Color.RGBToString(Math.round(ringColor.r), Math.round(ringColor.g), Math.round(ringColor.b), 0, "0x");
             graphics.fillStyle(ringColorString, 1);
             graphics.slice(
@@ -286,7 +256,7 @@ class playGame extends Phaser.Scene{
             var rounds = Phaser.Math.Between(gameOptions.wheelRounds.min, gameOptions.wheelRounds.max);
 
             // then will rotate by a random number from 0 to 360 degrees. This is the actual spin
-            var degrees = Phaser.Math.Between(0, 360);
+            var degrees = Phaser.Math.Between(gameOptions.spinDegree.min, gameOptions.spinDegree.max);
 
             // then will rotate back by a random amount of degrees
             var backDegrees = Phaser.Math.Between(gameOptions.backSpin.min, gameOptions.backSpin.max);
@@ -343,11 +313,8 @@ class playGame extends Phaser.Scene{
                         callbackScope: this,
                         onComplete: function(tween){
                             console.log('spin ended')
-                            // displaying prize text
-                            this.prizeText.setText(gameOptions.slices[prize].text);
+                            swal(gameOptions.winMessage)
 
-                            // player can spin again
-                            this.canSpin = true;
                         }
                     })
                 }
@@ -371,4 +338,32 @@ function resize() {
         canvas.style.width = (windowHeight * gameRatio) + "px";
         canvas.style.height = windowHeight + "px";
     }
+}
+
+
+function findWinAngleMin (slices, winIndex){
+    let winAngleMin = 0;
+    for (var i=0; i <= winIndex-1; i++){
+        winAngleMin += slices[i].degrees
+        console.log("winAngleMin", winAngleMin);
+    }
+    return winAngleMin
+}
+
+function findWinAngleMax (slices, winIndex){
+    let winAngleMax = 0;
+    for (var i=0; i <= winIndex; i++){
+        winAngleMax += slices[i].degrees
+        console.log("winAngleMax", winAngleMax);
+
+    }
+    return winAngleMax
+}
+
+function checkDataSrc(dataSrc){
+    if(!dataSrc.slices || !Array.isArray(dataSrc.slices) ) throw new Error('dataSrc require property slices as an array')
+    if(!dataSrc.slices[0].id || !dataSrc.slices[0].text || !dataSrc.slices[0].degrees) throw new Error('each slice require id, text, degrees')
+    if(!dataSrc.winMessage) throw new Error('dataSrc require winMessage property')
+    if(!dataSrc.wheelRounds) throw new Error('dataSrc require property wheelRounds')
+    if(!dataSrc.winId) throw new Error('ataSrc require property wheelRounds winId')
 }
